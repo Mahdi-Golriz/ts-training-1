@@ -4,7 +4,7 @@ const enum Category {
   Science,
 }
 
-interface Book {
+interface IBook {
   title: string;
   author: string;
   isbn: number;
@@ -13,21 +13,30 @@ interface Book {
   category: Category;
 }
 
-interface Library {
-  addBook(book: Book): void;
-  removeBook(isbn: number): void;
-  findBookByISBN(isbn: number): Book | undefined;
-  listAvailabeBooks(): Book[];
+interface ILibrary {
+  id: number;
+  name: string;
+  address: string;
 }
 
-interface User {
+interface ILibraryImplementation {
+  addBook(book: IBook): void;
+  removeBook(isbn: number): void;
+  findBookByISBN(isbn: number): IBook | undefined;
+  listAvailabeBooks(): IBook[];
+}
+
+interface IUser {
   name: string;
   userId: number;
 }
 
-type BookPreview = Pick<Book, "title" | "author">;
+type TBookPreview = Pick<IBook, "title" | "author">;
 
-interface SearchableItem {
+interface ISearchableItem {
   id: number;
   name: string;
 }
+
+export { Category }
+export type { IBook, ILibrary, ILibraryImplementation, IUser, TBookPreview, ISearchableItem }

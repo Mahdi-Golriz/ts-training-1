@@ -1,18 +1,20 @@
-import { LibraryUsers, librariesId } from "./UserManagement.js";
+import type { Category, IBook, ILibrary, ILibraryImplementation, ISearchableItem, IUser } from "./Models.js";
 
-class MyLibrary implements Library {
-  libraryId: librariesId;
+class Library implements ILibraryImplementation {
+  libraryId: number;
   name: string;
   address: string;
-  books: Book[] = [];
+  books: IBook[] = [];
 
-  constructor(id: librariesId, name: string, address: string) {
+  constructor(library: ILibrary) {
+    const { id, name, address } = library;
+
     this.libraryId = id;
     this.name = name;
     this.address = address;
   }
 
-  addBook(book: Book): void {
+  addBook(book: IBook): void {
     this.books = [...this.books, book];
   }
 
@@ -20,40 +22,53 @@ class MyLibrary implements Library {
     this.books = this.books.filter((book) => book.isbn !== isbn);
   }
 
-  findBookByISBN(isbn: number): Book | undefined {
+  findBookByISBN(isbn: number): IBook | undefined {
     return this.books.find((value) => value.isbn === isbn);
   }
 
-  listAvailabeBooks(): Book[] {
+  listAvailabeBooks(): IBook[] {
     return this.books.filter((book) => book.isAvailable);
   }
 
-  updateBook(isbn: number, bookDetails: Partial<Book>): void {
+  updateBook(isbn: number, bookDetails: Partial<IBook>): void {
     this.books = this.books.map((book) =>
       book.isbn === isbn ? { ...book, ...bookDetails } : book
     );
   }
 
-  borrowBook(isbn: number, user: User): void {
-    if (
-      LibraryUsers[this.libraryId].some((item) => item.userId === user.userId)
-    ) {
-      console.log("You are a member of this Library");
-      const isAvailable = this.findBookByISBN(isbn);
-      const isAccessible = this.listAvailabeBooks().some(
-        (item) => item.isbn === isbn
-      );
-      if (!isAvailable) {
-        console.log("Your requested book is not available in our Library");
-      } else if (!isAccessible) {
-        console.log("Your requested book is borrowed to someone else!");
-      } else {
-        console.log("You can get this book");
-        this.updateBook(isbn, { isAvailable: false });
-      }
-    } else {
+
+  userExistsInLibrary(userId: number, libraryId: number) {
+    return LibraryUsers[this.libraryId].some((item) => item.userId === user.userId)
+
+  }
+
+  borrowBook(isbn: number, user: IUser): void {
+
+    if (!this.userExistsInLibrary(1, 1)) {
       console.log("You are not a member of this Library");
+      return;
     }
+
+    console.log("Congratulation! You are a member of this Library");
+
+    const isAvailable = this.findBookByISBN(isbn);
+
+    if (!isAvailable) {
+      console.log("Your requested book is not available in our Library");
+      return;
+    }
+
+    const isAccessible = this.listAvailabeBooks().some(
+      (item) => item.isbn === isbn
+    );
+
+    if (!isAccessible) {
+      console.log("Your requested book is borrowed to someone else!");
+      return;
+    }
+
+    console.log("You can get this book");
+    this.updateBook(isbn, { isAvailable: false });
   }
 
   borrowedBooks(): void {
@@ -77,14 +92,14 @@ class MyLibrary implements Library {
     console.log(item);
   }
 
-  searchItemById<T extends SearchableItem>(
+  searchItemById<T extends ISearchableItem>(
     items: T[],
     id: number
   ): T | undefined {
     return items.find((item) => item.id === id);
   }
 
-  sortCategory(book: Book): Category | undefined {
+  sortCategory(book: IBook): Category | undefined {
     if (book.category === undefined) {
       return undefined;
     }
@@ -92,49 +107,4 @@ class MyLibrary implements Library {
   }
 }
 
-const MyLibraryInstace = new MyLibrary(librariesId.A, "A", "20111");
-
-MyLibraryInstace.addBook({
-  title: "1984",
-  author: "Orwell",
-  isbn: 10,
-  isAvailable: true,
-  pages: 100,
-  category: Category.Fiction,
-});
-MyLibraryInstace.addBook({
-  title: "The Lord of the Rings",
-  author: "Ronald",
-  isbn: 11,
-  isAvailable: true,
-  pages: 120,
-  category: Category.Fiction,
-});
-MyLibraryInstace.addBook({
-  title: "War and Peace",
-  author: "Leo Tolstoy",
-  isbn: 12,
-  isAvailable: true,
-  pages: 160,
-  category: Category.NonFiction,
-});
-MyLibraryInstace.addBook({
-  title: "Hamlet",
-  author: "Shakespeare",
-  isbn: 13,
-  isAvailable: true,
-  pages: 220,
-  category: Category.Science,
-});
-
-console.log(MyLibraryInstace.listAvailabeBooks());
-
-MyLibraryInstace.borrowedBooks();
-
-MyLibraryInstace.borrowBook(10, { name: "mahdi", userId: 1 });
-
-MyLibraryInstace.borrowedBooks();
-
-MyLibraryInstace.borrowBook(10, { name: "reza", userId: 2 });
-
-MyLibraryInstace.libraryUsers();
+export default Library;

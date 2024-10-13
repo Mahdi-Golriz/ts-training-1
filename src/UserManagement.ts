@@ -1,32 +1,21 @@
-// import type { IUser } from "./Models";
+import type { IUser } from "./Models";
+import StoreManagement from "./store";
 
-// export const LibraryUsers: Record<librariesId, IUser[]> = {
-//   [librariesId.A]: [users[0], users[1]],
-//   [librariesId.B]: [users[2], users[3]],
-//   [librariesId.C]: [users[4], users[5]],
-//   [librariesId.D]: [],
-// };
+class UserManagement {
 
-// // type LibrariesId = keyof typeof LibraryUsers;
+    createUser(user: IUser) {
+        StoreManagement.Instance.addUser(user);
 
-// function userManagement(libraryId: keyof typeof LibraryUsers, newUser: IUser) {
-//   const userExists = LibraryUsers[libraryId].some(
-//     (user) => user.userId === newUser.userId
-//   );
+        return user;
+    }
 
-//   if (!userExists) {
-//     LibraryUsers[libraryId].push(newUser);
-//   }
-// }
+    getUser(userId: number) {
+        return StoreManagement.Instance.getUsers.find(x => x.userId === userId);
+    }
 
-// userManagement(librariesId.A, { name: "ali", userId: 8 });
-// userManagement(librariesId.B, { name: "ali", userId: 9 });
+    addToLibrary(libraryId: number, userId: number) {
+        StoreManagement.Instance.addUserToLibrary(libraryId, userId);
+    }
+}
 
-
-// class UserManagement {
-
-
-
-
-
-// }
+export default UserManagement;

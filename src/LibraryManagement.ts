@@ -1,50 +1,68 @@
 import type { Category, IBook, ILibrary, ILibraryImplementation, ISearchableItem, IUser } from "./Models.js";
+import StoreManagement from "./store.js";
 
 class Library implements ILibraryImplementation {
   libraryId: number;
-  name: string;
-  address: string;
-  books: IBook[] = [];
 
-  constructor(library: ILibrary) {
-    const { id, name, address } = library;
-
-    this.libraryId = id;
-    this.name = name;
-    this.address = address;
+  constructor(libraryId: number) {
+    this.libraryId = libraryId;
   }
 
   addBook(book: IBook): void {
-    this.books = [...this.books, book];
+    const result = StoreManagement.Instance.addBookToLibrary(this.libraryId, book);
+
+    if (!result) {
+      console.log("Failed to add book to library");
+    } else {
+      console.log("Book added to library successfully.")
+    }
   }
 
   removeBook(isbn: number): void {
-    this.books = this.books.filter((book) => book.isbn !== isbn);
+    const result = StoreManagement.Instance.removeBookFromLibrary(this.libraryId, isbn);
+
+    if (!result) {
+      console.log("Failed to remove book to library");
+    } else {
+      console.log("Book removed from library successfully.")
+    }
   }
 
   findBookByISBN(isbn: number): IBook | undefined {
-    return this.books.find((value) => value.isbn === isbn);
+    const library = StoreManagement.Instance.getLibrary(this.libraryId);
+
+    if (!library) {
+      console.log(`Cannot find specified library: ${this.libraryId}`);
+      return;
+    }
+
+    return library.books.find(x => x.isbn === isbn);
   }
 
   listAvailabeBooks(): IBook[] {
-    return this.books.filter((book) => book.isAvailable);
+    const library = StoreManagement.Instance.getLibrary(this.libraryId);
+
+    if (!library) {
+      console.log(`Cannot find specified library: ${this.libraryId}`);
+      return [];
+    }
+
+    return library.books.filter(x => x.isAvailable !== false);
   }
 
-  updateBook(isbn: number, bookDetails: Partial<IBook>): void {
-    this.books = this.books.map((book) =>
-      book.isbn === isbn ? { ...book, ...bookDetails } : book
-    );
-  }
-
+  // updateBook(isbn: number, bookDetails: Partial<IBook>): void {
+  //   this.books = this.books.map((book) =>
+  //     book.isbn === isbn ? { ...book, ...bookDetails } : book
+  //   );
+  // }
 
   userExistsInLibrary(userId: number, libraryId: number) {
-    return LibraryUsers[this.libraryId].some((item) => item.userId === user.userId)
-
+    return StoreManagement.Instance.getLibraryUsers[libraryId].some(x => x === userId)
   }
 
   borrowBook(isbn: number, user: IUser): void {
 
-    if (!this.userExistsInLibrary(1, 1)) {
+    if (!this.userExistsInLibrary(user.userId, this.libraryId)) {
       console.log("You are not a member of this Library");
       return;
     }
@@ -68,24 +86,7 @@ class Library implements ILibraryImplementation {
     }
 
     console.log("You can get this book");
-    this.updateBook(isbn, { isAvailable: false });
-  }
-
-  borrowedBooks(): void {
-    const unAccessibleBooks = this.books.filter(
-      (book) => book.isAvailable === false
-    );
-
-    if (unAccessibleBooks.length === 0) {
-      console.log("All books are accessible");
-    } else {
-      console.log(unAccessibleBooks);
-    }
-  }
-
-  libraryUsers() {
-    const libUsers = LibraryUsers[this.libraryId];
-    console.log(libUsers);
+    // this.updateBook(isbn, { isAvailable: false });
   }
 
   logItem<T>(item: T): void {

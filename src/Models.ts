@@ -8,7 +8,6 @@ interface IBook {
   title: string;
   author: string;
   isbn: number;
-  isAvailable: boolean;
   pages?: number;
   category: Category;
 }
@@ -17,6 +16,7 @@ interface ILibrary {
   id: number;
   name: string;
   address: string;
+  books: IBook[];
 }
 
 interface ILibraryImplementation {
